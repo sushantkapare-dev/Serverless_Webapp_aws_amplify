@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Product</title>
+    <style>
+        h2, label, button {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 20px;
+            margin-left: 40px;
+        }
+        table {
+          
+            border-collapse: collapse;
+            margin-top: 15px;
+            margin-left: 40px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Add Product:</h2>
+
+    <form id="productForm">
+        <label for="productCode">Product Code:</label>
+        <input type="text" id="productCode" required>
+
+        <label for="price">Price:</label>
+        <input type="number" id="price" required>
+
+        <button type="button" onclick="addProduct()">Add Product</button>
+    </form>
+
+    <h2>Product List:</h2>
+
+    <table id="productTable">
+        <thead>
+            <tr>
+                <th>Product Code</th>
+                <th>Price</th>
+                <th>Created At</th>
+            </tr>
+        </thead>
+        <tbody id="productTableBody"></tbody>
+    </table>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            fetchProducts();
+        });
+
+        function addProduct() {
+            var productCode = document.getElementById('productCode').value;
+            var price = document.getElementById('price').value;
+
+            var data = {
+                operation: 'addProduct',
+                productCode: productCode,
+                price: price
+            };
+
+
+            fetch('YOUR_API_GATEWAY_URL', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(result => {
+                
+                alert(JSON.parse(result.body));
+               
+                // Clear form fields
+                document.getElementById('productCode').value = '';
+                document.getElementById('price').value = '';
+            })
+            .catch(error => {
+                console.error('Error adding product:', error);
+            });
+        }
+
+        function fetchProducts() {
+
+            var requestData = {
+               operation: 'listProduct'
+            };
+
+            fetch('YOUR_API_GATEWAY_URL', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData),
+            })
+            .then(response => response.json())
+            .then(responseData => {
+                const products = JSON.parse(responseData.body);
+
+                // Update product table
+                products.forEach(product => {
+                    updateProductTable(product);
+
+                });
+               
+            })
+            .catch(error => {
+                console.error('Error fetching products:', error);
+            });
+        }
+
+        function updateProductTable(product) {
+            var tableBody = document.getElementById('productTableBody');
+            var row = tableBody.insertRow();
+
+            var cell1 = row.insertCell(0);
+            var cell2 = row.insertCell(1);
+            var cell3 = row.insertCell(2);
+
+            cell1.textContent = product.productCode;
+            cell2.textContent = product.price;
+            cell3.textContent = product.createdAt;
+            
+        }
+    </script>
+
+</body>
+</html>
